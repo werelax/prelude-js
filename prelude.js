@@ -145,7 +145,7 @@ var R = (function(my) {
 var R = (function(my) {
   my.namespace = function(string, sandbox) {
     var spaces = string.split('.'),
-        root = my,
+        root = this,
         space;
     while (space = spaces.shift()) {
       root = root[space] || (root[space] = {});
