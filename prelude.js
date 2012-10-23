@@ -29,7 +29,7 @@ function merge() {
   return augment.apply(this, [{}].concat(sources));
 }
 
-runction clone(orig) {
+function clone(orig) {
   function F() {}
   F.prototype = orig;
   return new F();
