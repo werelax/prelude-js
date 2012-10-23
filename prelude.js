@@ -159,11 +159,12 @@ var R = (function(my) {
 
 var R = (function (my) {
 
-  my.Plantillas = function(text) {
+  my.Template = function(text) {
     var code = '%>' + text + '<%';
     code = code
     .replace(/[\n\r\t]/g,' ')
     .replace(/\s+/g, ' ')
+    .replace(/##/g, '')  // Just for security
     .replace(/<%=(.*?);?\s*%>/g, "##, $1, ##")
     .replace(/%>(.*?)<%/g, "_t_.push(##$1##); ")
     .replace(/##(.*?)##/g, function(_, str) {
@@ -175,13 +176,9 @@ var R = (function (my) {
     return function(data) { return fn.call(data); };
   };
 
-  my.Plantillas.byId = function (id) {
+  my.Template.byId = function (id) {
     var el = document.getElementById(id);
-    if (el) {
-      return my.Plantillas(el.innerHTML);
-    } else {
-      throw new Error("Plantilla: no existe el elemento con id: '" + id + "'");
-    }
+    if (el) return my.Template(el.innerHTML);
   };
 
   return my;
