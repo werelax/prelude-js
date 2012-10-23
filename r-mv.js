@@ -256,6 +256,7 @@ R.namespace('MVC', function(my) {
       options = options || {};
       augment(this, pick(options,
                          'model', 'template', 'tagName', 'parent', 'el'));
+      if (typeof this.parent == "string") this.parent = $(this.parent);
       this._delegate = options.delegate;
       if (this.model) {
         this.model.subscribe('change', bind(this, this.render));
