@@ -8,7 +8,7 @@ var R = (function (my) {
     F.prototype = backboneWrapped.prototype;
     K.prototype = new F();
     _.extend(K, R.Class, {constructor: backboneWrapped});
-    _.extend(K.prototype, Class.prototype);
+    _.extend(K.prototype, R.Class.prototype);
     K.prototype.init = function() {
       return backboneWrapped.apply(this, arguments);
     };
@@ -18,4 +18,6 @@ var R = (function (my) {
   my.Model = wrapBackboneClass('Model');
   my.View = wrapBackboneClass('View');
   my.Collection = wrapBackboneClass('Collection');
+
+  return my;
 }(R || {}));

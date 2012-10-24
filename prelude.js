@@ -243,7 +243,7 @@ var R = (function (my) {
       this._mediator = mediator;
     },
     notify: function(event) {
-      return this._mediator.on.apply(this._mediator, arguments);
+      return this._mediator.trigger.apply(this._mediator, arguments);
     }
   };
 
