@@ -104,7 +104,9 @@ var R = (function(my) {
 
     for (var name in prop) {
       if (typeof prop[name] == "function" &&
-          typeof _super[name] == "function") {
+          typeof _super[name] == "function" &&
+          prop[name].constructor == Function &&
+          _super[name].constructor == Function ) {
         proto[name] = (function(name, fn) {
           return function() {
             var tmp = this._super;
