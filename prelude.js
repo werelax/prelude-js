@@ -103,10 +103,10 @@ var R = (function(my) {
     var proto = new F();
 
     for (var name in prop) {
-      if (typeof prop[name] == "function" &&
-          typeof _super[name] == "function" &&
-          prop[name].constructor == Function &&
-          _super[name].constructor == Function ) {
+      if (typeof prop[name] === "function" &&
+          typeof _super[name] === "function" &&
+          prop[name].constructor === Function &&
+          _super[name].constructor === Function ) {
         proto[name] = (function(name, fn) {
           return function() {
             var tmp = this._super;
