@@ -7,7 +7,7 @@ var R = (function (my) {
         K = function() {};
     F.prototype = backboneWrapped.prototype;
     K.prototype = new F();
-    _.extend(K, newClass, {constructor: backboneWrapped});
+    _.extend(K, R.Class, {constructor: backboneWrapped});
     _.extend(K.prototype, Class.prototype);
     K.prototype.init = function() {
       return backboneWrapped.apply(this, arguments);
