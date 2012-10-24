@@ -81,13 +81,13 @@ R.namespace('MVC', function(my) {
       this.data = merge(this.data, newData);
       if (this.isValid() || options.skipValidation) {
         for (var prop in newData) {
-          if (!options.slient) this.publish("change:%1".format(prop), newData[prop]);
+          if (!options.slient) this.trigger("change:%1".format(prop), newData[prop]);
         }
-        if (!options.silent) this.publish("change", newData);
+        if (!options.silent) this.trigger("change", newData);
         return this;
       } else {
         this.data = oldData;
-        if (!options.silent) this.publish("invalid", newData);
+        if (!options.silent) this.trigger("invalid", newData);
         return false;
       }
     },
@@ -114,7 +114,7 @@ R.namespace('MVC', function(my) {
     },
     destroy: function() {
       this.store.destroy(this.getPath());
-      this.publish("deleted");
+      this.trigger("deleted");
     },
     validate: function() {
     },
@@ -158,7 +158,7 @@ R.namespace('MVC', function(my) {
       data.forEach(bind(this, function(data) {
         this.add(data, {silent: true});
       }));
-      this.publish('reset');
+      this.trigger('reset');
     },
     add: function(data, options) {
       options = options || {};
@@ -169,9 +169,9 @@ R.namespace('MVC', function(my) {
         model = new this.model(data);
         model.cid = (data.id || data.cid || model.cid);
       }
-      model.subscribe('*', curry(bind(this, this._broadcast), model));
+      model.on('*', curry(bind(this, this._broadcast), model));
       this.models.push(model);
-      if (!options.slient) this.publish('added', model);
+      if (!options.slient) this.trigger('added', model);
     },
     remove: function(cid, onlyLocal) {
       this.models = this.models.filter(function(model) {
@@ -182,7 +182,7 @@ R.namespace('MVC', function(my) {
           return true;
         }
       });
-      this.publish('removed', cid);
+      this.trigger('removed', cid);
     },
     toJSON: function() {
       return this.models.map("%1.toJSON({withId: true})".to_f());
@@ -212,10 +212,10 @@ R.namespace('MVC', function(my) {
     _broadcast: function(model, event) {
       var eventArgs = [].slice.call(arguments, 1);
       if (event == 'deleted') {
-        model.unsubscribe('*', arguments.callee);
+        model.off('*', arguments.callee);
         this.remove(model.cid, true);
       } else {
-        this.publish(event, [model].concat(eventArgs));
+        this.trigger(event, [model].concat(eventArgs));
       }
     }
   });
@@ -259,8 +259,8 @@ R.namespace('MVC', function(my) {
       if (typeof this.parent == "string") this.parent = $(this.parent);
       this._delegate = options.delegate;
       if (this.model) {
-        this.model.subscribe('change', bind(this, this.render));
-        this.model.subscribe('deleted', bind(this, this.remove));
+        this.model.on('change', bind(this, this.render));
+        this.model.on('deleted', bind(this, this.remove));
       }
       if (this.el) this._parseEvents();
     },

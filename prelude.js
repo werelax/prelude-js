@@ -192,9 +192,13 @@ var R = (function (my) {
 
 })(R || {});
 
-// Observable
+
+// Mixins
 
 var R = (function (my) {
+
+  // Observable
+
   my.Observable = {
     mixed: function(klass) {
       var klass_init = klass.prototype.init || function() {};
@@ -203,14 +207,15 @@ var R = (function (my) {
         return klass_init.apply(this, arguments);
       };
     },
-    subscribe: function(event, callback) {
+    on: function(event, callback, ctx) {
+      if (typeof event != "string") return this._onMany(event);
       this._subscribers[event] || (this._subscribers[event] = []);
-      this._subscribers[event].push(callback);
+      this._subscribers[event].push({cb:callback, ctx: ctx || {}});
     },
-    subscribeMany: function(desc) {
-      for (key in desc) { this.subscribe(key, desc[key]); }
+    _onMany: function(desc) {
+      for (key in desc) { this.on(key, desc[key]); }
     },
-    unsubscribe: function(event, callback) {
+    off: function(event, callback) {
       var subs = this._subscribers[event];
       if (!subs) { return; }
       for (var i=0; i<subs.length; i++) {
@@ -220,15 +225,46 @@ var R = (function (my) {
         }
       }
     },
-    publish: function(event) {
+    trigger: function(event) {
       var args = [].slice.call(arguments),
           eventArgs = args.slice(1),
           subscribers = this._subscribers[event] || [],
           subscribersToAll = this._subscribers['*'] || [];
-      subscribers.forEach(function(sub){ sub.apply({}, eventArgs); });
-      subscribersToAll.forEach(function(sub) { sub.apply({}, args); });
+      subscribers.forEach(function(sub){ sub.cb.apply(sub.cbx, eventArgs); });
+      subscribersToAll.forEach(function(sub) { sub.cb.apply(sub.ctx, args); });
     }
   };
+
+
+  // Mediable
+
+  my.Mediable = {
+    setMediator: function(mediator) {
+      this._mediator = mediator;
+    },
+    notify: function(event) {
+      return this._mediator.on.apply(this._mediator, arguments);
+    }
+  };
+
+  return my;
+}(R || {}));
+
+// Mediator
+
+var R = (function(my) {
+  my.Mediator = R.Class.extend({
+    init: function(desc) {
+      if (desc) desc.call({}, this);
+    },
+    add: function() {
+      var elems = [].slice.call(arguments);
+      elems.forEach(bind(this, function(e) {
+        if (e.setMediator) e.setMediator(this)
+      }));
+    }
+  });
+  my.Mediator.mixin(R.Observable);
 
   return my;
 }(R || {}));
