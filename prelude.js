@@ -104,7 +104,7 @@ var R = (function(my) {
 
     // Ensure init back chain
     prop['init'] = prop['init'] || function() {
-      return this._super.apply(this, arguments);
+      if (this._super) return this._super.apply(this, arguments);
     };
 
     for (var name in prop) {
