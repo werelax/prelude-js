@@ -102,11 +102,6 @@ var R = (function(my) {
     F.prototype = _super;
     var proto = new F();
 
-    // Ensure init back chain
-    prop['init'] = prop['init'] || function() {
-      if (this._super) return this._super.apply(this, arguments);
-    };
-
     for (var name in prop) {
       if (typeof prop[name] === "function" &&
           typeof _super[name] === "function" &&
@@ -140,6 +135,10 @@ var R = (function(my) {
 
     return Klass;
   };
+
+  // The global super-constructor, wich does
+  // nothin gexcept being the top of the chain
+  Class.prototype.init = function() { };
 
   my.Class = Class;
 
