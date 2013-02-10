@@ -1,8 +1,10 @@
 // Utilidades generales
 
 function bind(ctx, fn) {
+  var oldargs = [].slice.call(arguments, 2);
   return function() {
-    return fn.apply(ctx, [].slice.call(arguments));
+    var newargs = [].slice.call(arguments);
+    return fn.apply(ctx, oldargs.concat(newargs));
   }
 };
 
