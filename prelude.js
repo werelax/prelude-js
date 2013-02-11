@@ -5,15 +5,15 @@ function bind(ctx, fn) {
   return function() {
     var newargs = [].slice.call(arguments);
     return fn.apply(ctx, oldargs.concat(newargs));
-  }
-};
+  };
+}
 
 function curry(fn) {
   var oldargs = [].slice.call(arguments, 1);
   return function() {
     var newargs = [].slice.call(arguments);
     return fn.apply(this, oldargs.concat(newargs));
-  }
+  };
 }
 
 function augment(target) {
@@ -44,7 +44,7 @@ function pick(obj) {
     if (obj.hasOwnProperty(key)) target[key] = obj[key];
   });
   return target;
-};
+}
 
 // Un par de aumentos por comodidad (cuidado con colisiones...)
 
@@ -53,7 +53,7 @@ String.prototype.format = function() {
       result = this.slice(),
       regexp;
   for (var i=args.length; i--;) {
-    regexp = new RegExp("%"+(i+1), "g")
+    regexp = new RegExp("%"+(i+1), "g");
     result = result.replace(regexp, args[i]);
   }
   return result;
@@ -67,7 +67,7 @@ String.prototype.times = function(cb) {
   parseInt(this, 10).times(cb);
 };
 
-String.prototype.to_f = function() {
+String.prototype.f = function() {
   var code = this.replace(/\%(\d+)/g, "(arguments[parseInt($1, 10) - 1])"),
       statements = code.split(';'),
       last = statements.pop();
@@ -116,8 +116,8 @@ var R = (function(my) {
             var ret = fn.apply(this, arguments);
             this._super = tmp;
             return ret;
-          }
-        })(name, prop[name]);
+          };
+        }(name, prop[name]));
       } else {
         proto[name] = prop[name];
       }
@@ -154,9 +154,10 @@ var R = (function(my) {
   my.namespace = function(string, sandbox) {
     var spaces = string.split('.'),
         root = this,
-        space;
-    while (space = spaces.shift()) {
+        space = spaces.shift();
+    while (space) {
       root = root[space] || (root[space] = {});
+      space = spaces.shift();
     }
     return sandbox(root);
   };
@@ -214,7 +215,7 @@ var R = (function (my) {
       this._subscribers[event].push({cb:callback, ctx: ctx || {}});
     },
     _onMany: function(desc) {
-      for (key in desc) { this.on(key, desc[key]); }
+      for (var key in desc) { this.on(key, desc[key]); }
     },
     off: function(event, callback) {
       var subs = this._subscribers[event];
@@ -261,7 +262,7 @@ var R = (function(my) {
     add: function() {
       var elems = [].slice.call(arguments);
       elems.forEach(bind(this, function(e) {
-        if (e.setMediator) e.setMediator(this)
+        if (e.setMediator) e.setMediator(this);
       }));
     }
   });
