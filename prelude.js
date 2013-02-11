@@ -84,7 +84,7 @@ var R = (function(my) {
 
   function mixin(target, source) {
     for (var prop in source) {
-      if (source.hasownproperty(prop)) {
+      if (source.hasOwnProperty(prop)) {
         if (!target[prop]) { target[prop] = source[prop]; }
       }
     }
