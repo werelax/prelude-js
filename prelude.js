@@ -19,8 +19,10 @@ function curry(fn) {
 function augment(target) {
   var sources = [].slice.call(arguments, 1);
   sources.forEach(function(source) {
-    for (var prop in source) if (source.hasOwnProperty(prop)) {
-      target[prop] = source[prop];
+    for (var prop in source) {
+      if (source.hasOwnProperty(prop)) {
+        target[prop] = source[prop];
+      }
     }
   });
   return target;
@@ -71,7 +73,7 @@ String.prototype.f = function() {
   var code = this.replace(/\%(\d+)/g, "(arguments[parseInt($1, 10) - 1])"),
       statements = code.split(';'),
       last = statements.pop();
-  if (!/return/.test(last)) last = "return " + last;
+  if (!(/return/.test(last))) last = "return " + last;
   statements.push(last);
   return new Function(statements.join(';'));
 };
@@ -81,8 +83,10 @@ String.prototype.f = function() {
 var R = (function(my) {
 
   function mixin(target, source) {
-    for (var prop in source) if (source.hasOwnProperty(prop)) {
-      if (!target[prop]) { target[prop] = source[prop]; }
+    for (var prop in source) {
+      if (source.hasownproperty(prop)) {
+        if (!target[prop]) { target[prop] = source[prop]; }
+      }
     }
   }
 
@@ -128,10 +132,11 @@ var R = (function(my) {
     }
 
     // Heredamos las propiedades de clase
-    for (var classProp in this) if (this.hasOwnProperty(classProp)) {
-      Klass[classProp] = this[classProp];
+    for (var classProp in this) {
+      if (this.hasOwnProperty(classProp)) {
+        Klass[classProp] = this[classProp];
+      }
     }
-
     Klass.prototype = proto;
     Klass.prototype.constructor = Klass;
 
@@ -170,13 +175,12 @@ var R = (function (my) {
 
   my.Template = function(text) {
     var code = '%>' + text + '<%';
-    code = code
-    .replace(/[\n\r\t]/g,' ')
-    .replace(/\s+/g, ' ')
-    .replace(/##/g, '')  // Just for security
-    .replace(/<%=(.*?);?\s*%>/g, "##, $1, ##")
-    .replace(/%>(.*?)<%/g, "_t_.push(##$1##); ")
-    .replace(/##(.*?)##/g, function(_, str) {
+    code = code.replace(/[\n\r\t]/g,' ');
+    code = code.replace(/\s+/g, ' ');
+    code = code.replace(/##/g, '');  // Just for security
+    code = code.replace(/<%=(.*?);?\s*%>/g, "##, $1, ##");
+    code = code.replace(/%>(.*?)<%/g, "_t_.push(##$1##); ");
+    code = code.replace(/##(.*?)##/g, function(_, str) {
       str = str.replace(/(['"])/g, '\\$1');
       return "'" + str + "'";
     });
@@ -210,9 +214,12 @@ var R = (function (my) {
       };
     },
     on: function(event, callback, ctx) {
-      if (typeof event != "string") return this._onMany(event);
-      this._subscribers[event] || (this._subscribers[event] = []);
-      this._subscribers[event].push({cb:callback, ctx: ctx || {}});
+      if (typeof event != "string") {
+        this._onMany(event);
+      } else {
+        this._subscribers[event] || (this._subscribers[event] = []);
+        this._subscribers[event].push({cb:callback, ctx: ctx || {}});
+      }
     },
     _onMany: function(desc) {
       for (var key in desc) { this.on(key, desc[key]); }
