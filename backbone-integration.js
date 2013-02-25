@@ -19,5 +19,15 @@ var R = (function (my) {
   my.View = wrapBackboneClass('View');
   my.Collection = wrapBackboneClass('Collection');
 
+  /* Extending a Model inherits his defaults: */
+  var extFn = my.Model.extend;
+  my.Model.extend = function(options) {
+    var super_defaults = this.prototype.defaults;
+    if (super_defaults && options.defaults) {
+      options.defaults = _.extend({}, super_defaults, options.defaults);
+    }
+    return extFn.call(this, options);
+  };
+
   return my;
 }(R || {}));
