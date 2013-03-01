@@ -48,6 +48,17 @@ function pick(obj) {
   return target;
 }
 
+function rand(a, b) {
+  var top = b ? (b - a) : a,
+      delta = b ? a : 0;
+  return Math.floor(Math.random() * top + delta);
+}
+
+function randString(length) {
+  length || (length = 10);
+  return rand(Math.pow(36, length)).toString(36);
+}
+
 var R = (function(my) {
   augment(my, {
     bind: bind,
@@ -55,7 +66,9 @@ var R = (function(my) {
     augment: augment,
     merge: merge,
     clone: clone,
-    pick: pick
+    pick: pick,
+    rand: rand,
+    randString: randString
   });
   return my;
 }(R || {}));
