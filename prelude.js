@@ -48,6 +48,18 @@ function pick(obj) {
   return target;
 }
 
+var R = (function(my) {
+  augment(my, {
+    bind: bind,
+    curry: curry,
+    augment: augment,
+    merge: merge,
+    clone: clone,
+    pick: pick
+  });
+  return my;
+}(R || {}));
+
 // Un par de aumentos por comodidad (cuidado con colisiones...)
 
 String.prototype.format = function() {
@@ -277,3 +289,7 @@ var R = (function(my) {
 
   return my;
 }(R || {}));
+
+/* CommonJS exports */
+
+if (exports) { exports = R; }
