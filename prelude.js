@@ -305,4 +305,6 @@ var R = (function(my) {
 
 /* CommonJS exports */
 
-if (exports) { exports = R; }
+(function() {
+  if (this.exports) { this.exports = R; }
+}());
