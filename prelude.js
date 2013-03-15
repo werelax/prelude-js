@@ -59,6 +59,13 @@ function randString(length) {
   return rand(Math.pow(36, length)).toString(36);
 }
 
+function keys(obj, inherited) {
+  if (obj !== Object(obj)) throw new TypeError('Invalid object');
+  var keys = [];
+  for (var key in obj) if (inherited || obj.hasOwnProperty(key)) keys.push(key);
+  return keys;
+}
+
 var R = (function(my) {
   augment(my, {
     bind: bind,
@@ -68,7 +75,8 @@ var R = (function(my) {
     clone: clone,
     pick: pick,
     rand: rand,
-    randString: randString
+    randString: randString,
+    keys: keys
   });
   return my;
 }(R || {}));
@@ -240,7 +248,8 @@ var R = (function (my) {
     },
     on: function(event, callback, ctx) {
       if (typeof event != "string") {
-        this._onMany(event);
+        ctx = callback || {};
+        this._onMany(event, ctx);
       } else {
         this._subscribers[event] || (this._subscribers[event] = []);
         this._subscribers[event].push({cb:callback, ctx: ctx || {}});
@@ -249,13 +258,24 @@ var R = (function (my) {
     _onMany: function(desc) {
       for (var key in desc) { this.on(key, desc[key]); }
     },
-    off: function(event, callback) {
-      var subs = this._subscribers[event];
-      if (!subs) { return; }
-      for (var i=0; i<subs.length; i++) {
-        if (subs[i] === callback) {
-          subs.splice(i, 1);
-          break;
+    off: function(event, callback, ctx) {
+      var events, subs;
+      if (!event && !callback && !ctx) {
+        return this._subscribers = {};
+      }
+      events = event ? [event] || R.keys(this._subscribers);
+      for (var j=0, _len=events.length; j<_len; j++) {
+        subs = this._subscribers[event];
+        if (subs.length > 0) {
+          for (var i=0; i<subs.length; i++) {
+            if ((callback && ctx && subs[i].cb === callback && subs[i].ctx === ctx) ||
+                (callback && !ctx && subs[i].cb === callback) ||
+                (!callback && ctx && subs[i].ctx === ctx) ||
+                (!callback && !ctx)) {
+              subs.splice(i, 1);
+            }
+          }
+          this._subscribers[event] = subs;
         }
       }
     },
