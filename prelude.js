@@ -263,7 +263,7 @@ var R = (function (my) {
       if (!event && !callback && !ctx) {
         return this._subscribers = {};
       }
-      events = event ? [event] || R.keys(this._subscribers);
+      events = event ? [event] : R.keys(this._subscribers);
       for (var j=0, _len=events.length; j<_len; j++) {
         subs = this._subscribers[event];
         if (subs.length > 0) {
