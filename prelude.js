@@ -255,8 +255,8 @@ var R = (function (my) {
         this._subscribers[event].push({cb:callback, ctx: ctx || {}});
       }
     },
-    _onMany: function(desc) {
-      for (var key in desc) { this.on(key, desc[key]); }
+    _onMany: function(desc, ctx) {
+      for (var key in desc) { this.on(key, desc[key], ctx); }
     },
     off: function(event, callback, ctx) {
       var events, subs;
@@ -284,7 +284,7 @@ var R = (function (my) {
           eventArgs = args.slice(1),
           subscribers = this._subscribers[event] || [],
           subscribersToAll = this._subscribers['*'] || [];
-      subscribers.forEach(function(sub){ sub.cb.apply(sub.cbx, eventArgs); });
+      subscribers.forEach(function(sub){ sub.cb.apply(sub.ctx, eventArgs); });
       subscribersToAll.forEach(function(sub) { sub.cb.apply(sub.ctx, args); });
     }
   };
