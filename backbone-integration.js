@@ -18,6 +18,7 @@ var R = (function (my) {
   my.Model = wrapBackboneClass('Model');
   my.View = wrapBackboneClass('View');
   my.Collection = wrapBackboneClass('Collection');
+  my.Router = wrapBackboneClass('Router');
 
   /* Extending a Model inherits his defaults: */
   var extFn = my.Model.extend;
