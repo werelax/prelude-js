@@ -17,6 +17,8 @@ var R = (function (my) {
 
   my.Model = wrapBackboneClass('Model');
   my.View = wrapBackboneClass('View');
+  /* Because, c'mon, they are controllers! */
+  my.Controller = my.View;
   my.Collection = wrapBackboneClass('Collection');
   my.Router = wrapBackboneClass('Router');
 
