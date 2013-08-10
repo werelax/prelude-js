@@ -95,11 +95,13 @@ String.prototype.format = function() {
 };
 
 Number.prototype.times = function(cb) {
-  for (var i=0, _times=this; i < _times; i++) cb(i);
+  var result = [];
+  for (var i=0, _times=this; i < _times; i++) result.push(cb(i));
+  return result;
 };
 
 String.prototype.times = function(cb) {
-  parseInt(this, 10).times(cb);
+  return parseInt(this, 10).times(cb);
 };
 
 String.prototype.f = function() {
@@ -185,6 +187,54 @@ var R = (function(my) {
   return my;
 
 }(R || function(){}));
+
+// Herencia, con otro enfoque
+
+var R = (function(my) {
+  function extend(sup, prop, staticProp) {
+    prop || (prop = {});
+    staticProp || (staticProp = {});
+    var _super = sup.prototype,
+        F = function(){ if (this.init) return this.init.apply(this,arguments); },
+        proto = F.prototype = Object.create(_super)
+    // el truco
+    for (var k in prop) if (prop.hasOwnProperty(k)) {
+      if (typeof prop[k] === "function" && typeof _super[k] === "function"
+          && prop[k].constructor === Function && _super[k].constructor === Function) {
+        proto[k] = (function(k, fn, supFn) {
+          return function() {
+            var ret
+            this._super = supFn
+            ret = fn.apply(this, arguments)
+            this._super = undefined
+            return ret
+          };
+        }(k, prop[k], _super[k]));
+      } else {
+        proto[k] = prop[k]
+      }
+    }
+    // heredamos las propiedades de clase
+    for (var classProp in sup) if (sup.hasOwnProperty(classProp)) {
+      Klass[classProp] = sup[classProp];
+    }
+    for (var classProp in staticProp) if (staticProp.hasOwnProperty(classProp)) {
+      Klass[classProp] = staticProp[classProp];
+    }
+    // burocracia
+    F.prototype.constructor = F
+    F.prototype.super = sup
+    // utilidades
+    F.mixin = Class.mixin;
+    F.include = Class.include;
+
+    return F
+  }
+
+  my.extend = extend;
+
+  return my
+}(R || {}));
 
 // Namespace
 
