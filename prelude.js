@@ -48,6 +48,12 @@ function pick(obj) {
   return target;
 }
 
+function omit(obj, props) {
+  var result = merge(obj), p;
+  while (p = props.pop()) delete result[p];
+  return result;
+}
+
 function rand(a, b) {
   var top = b ? (b - a) : a,
       delta = b ? a : 0;
@@ -66,6 +72,56 @@ function keys(obj, inherited) {
   return keys;
 }
 
+/* Iterators. The obvious are just for completion */
+
+function isArray(e) {
+  // I know this can be improved, but it's enough for now
+  return e instanceof Array;
+}
+
+function objMap(obj, fn) {
+  var result = {}
+  for (var k in obj) if (obj.hasOwnProperty(k)) result[k] = fn.call(obj, k, obj[k])
+  return result
+}
+
+function map(list, fn) {
+  if (!isArray(list)) return objMap(list, fn)
+  var result = new Array(list.length)
+  for (var i=0,_len=list.length; i<_len; i++) { result[i] = fn.call(list, list[i]) }
+  return result
+}
+
+function objReduce(obj, fn, acc) {
+  for (var k in obj) if (obj.hasOwnProperty(k)) acc = fn.call(obj, k, obj[k], acc)
+  return acc
+}
+
+function reduce(list, fn, acc) {
+  if (!isArray(list)) return objReduce(list, fn, acc)
+  if (!acc) {
+    acc = list[0]
+    list = list.slice(1)
+  }
+  for (var i=0,_len=list.length; i<_len; i++) { acc = fn.call(list, list[i], acc) }
+  return acc
+}
+
+function objEach(obj, fn) {
+  for (var k in obj) if (obj.hasOwnProperty(k)) fn.call(obj, k, obj[k])
+}
+
+function each(list, fn) {
+  if (!isArray(list)) return objEach(list, fn)
+  for (var i=0,_len=list.length; i<_len; i++) { fn.call(list, list[i]) }
+}
+
+function uniq(list) {
+  return list.filter(function (e, i, arr) {
+    return arr.lastIndexOf(e) === i;
+  });
+}
+
 var R = (function(my) {
   augment(my, {
     bind: bind,
@@ -74,9 +130,14 @@ var R = (function(my) {
     merge: merge,
     clone: clone,
     pick: pick,
+    omit: omit,
     rand: rand,
     randString: randString,
-    keys: keys
+    keys: keys,
+    map: map,
+    each: each,
+    reduce: reduce,
+    uniq: uniq
   });
   return my;
 }(R || {}));
@@ -136,7 +197,7 @@ var R = (function(my) {
     if (m.mixed) { m.mixed(this); }
   };
 
-  Class.extend = function(prop) {
+  Class.extend = function(prop, staticProp) {
     var _super = this.prototype;
 
     function F() {}
@@ -172,6 +233,13 @@ var R = (function(my) {
         Klass[classProp] = this[classProp];
       }
     }
+    if (staticProp) {
+      for (var classProp in staticProp) {
+        if (staticProp.hasOwnProperty(classProp)) {
+          Klass[classProp] = staticProp[classProp];
+        }
+      }
+    }
     Klass.prototype = proto;
     Klass.prototype.constructor = Klass;
 
@@ -186,12 +254,13 @@ var R = (function(my) {
 
   return my;
 
-}(R || function(){}));
+}(R || {}));
 
 // Herencia, con otro enfoque
 
 var R = (function(my) {
-  function extend(sup, prop, staticProp) {
+
+  my.extend = function(sup, prop, staticProp) {
     prop || (prop = {});
     staticProp || (staticProp = {});
     var _super = sup.prototype,
@@ -227,13 +296,13 @@ var R = (function(my) {
     // utilidades
     F.mixin = Class.mixin;
     F.include = Class.include;
+    F.extend = Class.extend;
 
     return F
-  }
-
-  my.extend = extend;
+  };
 
   return my
+
 }(R || {}));
 
 // Namespace
@@ -375,6 +444,6 @@ var R = (function(my) {
 
 /* CommonJS exports */
 
-(function() {
-  if (this.exports) { this.exports = R; }
-}());
+try {
+  if (exports) { augment(exports, R); }
+} catch (e) {}
