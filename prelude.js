@@ -60,9 +60,10 @@ function rand(a, b) {
   return Math.floor(Math.random() * top + delta);
 }
 
-function randString(length) {
+function randString(length, base) {
   length || (length = 10);
-  return rand(Math.pow(36, length)).toString(36);
+  base || (base = 36);
+  return rand(Math.pow(base, length)).toString(base);
 }
 
 function keys(obj, inherited) {
@@ -79,41 +80,52 @@ function isArray(e) {
   return e instanceof Array;
 }
 
+function isFunction(e) {
+  return typeof e === "function"
+}
+
+function isString(e) {
+  return typeof e === "string"
+}
+
 function objMap(obj, fn) {
   var result = {}
-  for (var k in obj) if (obj.hasOwnProperty(k)) result[k] = fn.call(obj, k, obj[k])
-  return result
+  for (var k in obj) if (obj.hasOwnProperty(k)) result[k] = fn.call(obj, k, obj[k]);
+  return result;
 }
 
 function map(list, fn) {
-  if (!isArray(list)) return objMap(list, fn)
-  var result = new Array(list.length)
-  for (var i=0,_len=list.length; i<_len; i++) { result[i] = fn.call(list, list[i]) }
-  return result
+  if (!isFunction(fn) && isString(fn)) fn = fn.f();
+  if (!isArray(list)) return objMap(list, fn);
+  var result = new Array(list.length);
+  for (var i=0,_len=list.length; i<_len; i++) { result[i] = fn.call(list, list[i]); }
+  return result;
 }
 
 function objReduce(obj, fn, acc) {
-  for (var k in obj) if (obj.hasOwnProperty(k)) acc = fn.call(obj, k, obj[k], acc)
-  return acc
+  for (var k in obj) if (obj.hasOwnProperty(k)) acc = fn.call(obj, k, obj[k], acc);
+  return acc;
 }
 
 function reduce(list, fn, acc) {
-  if (!isArray(list)) return objReduce(list, fn, acc)
+  if (!isFunction(fn) && isString(fn)) fn = fn.f();
+  if (!isArray(list)) return objReduce(list, fn, acc);
   if (!acc) {
-    acc = list[0]
-    list = list.slice(1)
+    acc = list[0];
+    list = list.slice(1);
   }
-  for (var i=0,_len=list.length; i<_len; i++) { acc = fn.call(list, list[i], acc) }
-  return acc
+  for (var i=0,_len=list.length; i<_len; i++) { acc = fn.call(list, list[i], acc); }
+  return acc;
 }
 
 function objEach(obj, fn) {
-  for (var k in obj) if (obj.hasOwnProperty(k)) fn.call(obj, k, obj[k])
+  for (var k in obj) if (obj.hasOwnProperty(k)) fn.call(obj, k, obj[k]);
 }
 
 function each(list, fn) {
-  if (!isArray(list)) return objEach(list, fn)
-  for (var i=0,_len=list.length; i<_len; i++) { fn.call(list, list[i]) }
+  if (!isFunction(fn) && isString(fn)) fn = fn.f();
+  if (!isArray(list)) return objEach(list, fn);
+  for (var i=0,_len=list.length; i<_len; i++) { fn.call(list, list[i]); }
 }
 
 function uniq(list) {
@@ -121,6 +133,20 @@ function uniq(list) {
     return arr.lastIndexOf(e) === i;
   });
 }
+
+/* apply constructor to arguments with new, like construct(MiClass, [1, 2, 3]) */
+function construct(constructor, args) {
+  function F() { return constructor.apply(this, args); }
+  F.prototype = constructor.prototype
+  return new F();
+}
+
+
+function value(vOrF, ctx) {
+  if (isFunction(vOrF)) vOrF = vOrF.call(ctx || {})
+  return vOrF
+}
+
 
 var R = (function(my) {
   augment(my, {
@@ -137,7 +163,8 @@ var R = (function(my) {
     map: map,
     each: each,
     reduce: reduce,
-    uniq: uniq
+    uniq: uniq,
+    value: value
   });
   return my;
 }(R || {}));
@@ -155,7 +182,8 @@ String.prototype.format = function() {
   return result;
 };
 
-Number.prototype.times = function(cb) {
+Number.prototype.times = function(p) {
+  var cb = (typeof p === "function") ? p : function() { return p; };
   var result = [];
   for (var i=0, _times=this; i < _times; i++) result.push(cb(i));
   return result;
@@ -285,18 +313,18 @@ var R = (function(my) {
     }
     // heredamos las propiedades de clase
     for (var classProp in sup) if (sup.hasOwnProperty(classProp)) {
-      Klass[classProp] = sup[classProp];
+      F[classProp] = sup[classProp];
     }
     for (var classProp in staticProp) if (staticProp.hasOwnProperty(classProp)) {
-      Klass[classProp] = staticProp[classProp];
+      F[classProp] = staticProp[classProp];
     }
     // burocracia
     F.prototype.constructor = F
     F.prototype.super = sup
     // utilidades
-    F.mixin = Class.mixin;
-    F.include = Class.include;
-    F.extend = Class.extend;
+    F.mixin = R.Class.mixin;
+    F.include = R.Class.include;
+    F.extend = R.Class.extend;
 
     return F
   };
