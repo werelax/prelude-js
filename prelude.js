@@ -206,24 +206,26 @@ String.prototype.f = function() {
 
 var R = (function(my) {
 
-  function mixin(target, source) {
+  function mixin(target, source, options) {
+    options || (options = {})
     for (var prop in source) {
       if (source.hasOwnProperty(prop)) {
-        if (!target[prop]) { target[prop] = source[prop]; }
+        if (!target[prop] || options.force) { target[prop] = source[prop]; }
       }
     }
   }
 
   var Class = function() {};
 
-  Class.include = function(m) {
-    mixin(this, m);
+  Class.include = function(m, options) {
+    mixin(this, m, options);
     if (m.included) { m.included(this); }
   };
-  Class.mixin = function(m) {
-    mixin(this.prototype, m);
+  Class.mixin = function(m, options) {
+    mixin(this.prototype, m, options);
     if (m.mixed) { m.mixed(this); }
   };
+
 
   Class.extend = function(prop, staticProp) {
     var _super = this.prototype;
