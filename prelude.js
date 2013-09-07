@@ -141,10 +141,21 @@ function construct(constructor, args) {
   return new F();
 }
 
-
 function value(vOrF, ctx) {
   if (isFunction(vOrF)) vOrF = vOrF.call(ctx || {})
   return vOrF
+}
+
+function rotright(arr) {
+  var r = arr.slice();
+  r.unshift(r.pop());
+  return r;
+}
+
+function rotleft(arr) {
+  var r = arr.slice();
+  r.push(r.shift());
+  return r;
 }
 
 
@@ -164,7 +175,9 @@ var R = (function(my) {
     each: each,
     reduce: reduce,
     uniq: uniq,
-    value: value
+    value: value,
+    rotright: rotright,
+    rotleft: rotleft
   });
   return my;
 }(R || {}));
@@ -321,8 +334,8 @@ var R = (function(my) {
       F[classProp] = staticProp[classProp];
     }
     // burocracia
-    F.prototype.constructor = F
-    F.prototype.super = sup
+    F.prototype.constructor = F;
+    F.prototype.superClass = sup;
     // utilidades
     F.mixin = R.Class.mixin;
     F.include = R.Class.include;
