@@ -215,6 +215,19 @@ String.prototype.f = function() {
   return new Function(statements.join(';'));
 };
 
+if (Object.defineProperty) {
+  Object.defineProperty(Object.prototype, "bind", {
+    value: function(method) {
+      var fn = this[method],
+          args = [].slice.call(arguments, 1)
+      console.log(method, fn)
+      if (fn) return fn.bind.apply(fn, [this].concat(args));
+      throw new Error("Obj no tiene método: " + method);
+    },
+    enumerable: false
+  })
+}
+
 // Herencia clásica y mixins
 
 var R = (function(my) {
