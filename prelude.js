@@ -327,12 +327,16 @@ var R = (function(my) {
       if (typeof prop[k] === "function" && typeof _super[k] === "function"
           && prop[k].constructor === Function && _super[k].constructor === Function) {
         proto[k] = (function(k, fn, supFn) {
-          return function() {
-            var ret
-            this._super = supFn
-            ret = fn.apply(this, arguments)
-            this._super = undefined
-            return ret
+          return function proxy() {
+            if (this instanceof proxy) {
+              return construct(fn, arguments);
+            } else {
+              var ret
+              this._super = supFn
+              ret = fn.apply(this, arguments)
+              this._super = undefined
+              return ret
+            }
           };
         }(k, prop[k], _super[k]));
       } else {
